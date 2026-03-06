@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天气预报汉语学习游戏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF6B6B;
+            --success: #27AE60;
+            --danger: #E74C3C;
+            --dark: #2C3E50;
+            --light: #ECF0F1;
+            --blue: #3498DB;
+            --purple: #667eea;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Hiragino Sans GB', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--dark);
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            max-width: 1000px;
+            width: 100%;
+            padding: 40px;
+            animation: slideIn 0.6s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #7F8C8D;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ===== LOGIN SCREEN ===== */
+        .login-screen {
+            text-align: center;
+        }
+
+        .login-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+        }
+
+        .login-banner h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .login-form {
+            background: #F5F7FA;
+            padding: 40px;
+            border-radius: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #E0E0E0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .start-button {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .start-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* ===== GAME SCREEN ===== */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #E0E0E0;
+        }
+
+        .student-info {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .level-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--light);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .level-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .level-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .level-desc {
+            font-size: 14px;
+            color: #7F8C8D;
+        }
+
+        .question-box {
+            background: linear-gradient(135deg, #F5F7FA 0%, #F0F3F7 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .question-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .question-left {
+            flex: 1;
+        }
+
+        .question-number {
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .audio-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF9F43 0%, #EE5A6F 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(255, 159, 67, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .audio-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(255, 159, 67, 0.4);
+        }
+
+        .audio-btn.playing {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .question-text {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .question-image {
+            font-size: 48px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #E0E0E0;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 32px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .option:hover:not(.disabled) {
+            border-color: #4ECDC4;
+            background: rgba(78, 205, 196, 0.05);
+            transform: translateX(4px);
+        }
+
+        .option.correct {
+            border-color: var(--success);
+            background: rgba(39, 174, 96, 0.1);
+        }
+
+        .option.incorrect {
+            border-color: var(--danger);
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .option.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .option ruby {
+            font-size: 0.6em;
+            color: #8E44AD;
+        }
+
+        .pinyin-inline {
+            font-size: 14px;
+            color: #8E44AD;
+            font-weight: 400;
+            margin-left: 4px;
+        }
+
+        .radio {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #CCC;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .option.correct .radio,
+        .option.incorrect .radio {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .option.incorrect .radio {
+            background: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .navigation {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--dark);
+            border: 2px solid #E0E0E0;
+        }
+
+        /* ===== FEEDBACK MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            overflow-y: auto;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.4s ease;
+            max-width: 750px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 30px;
+            border-bottom: 4px solid #E0E0E0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header.correct {
+            background: linear-gradient(135deg, rgba(39, 174, 96, 0.15) 0%, rgba(46, 204, 113, 0.15) 100%);
+            border-bottom-color: var(--success);
+        }
+
+        .modal-header.incorrect {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.15) 0%, rgba(245, 141, 109, 0.15) 100%);
+            border-bottom-color: var(--danger);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .modal-header.correct .modal-title {
+            color: var(--success);
+        }
+
+        .modal-header.incorrect .modal-title {
+            color: var(--danger);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--dark);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .feedback-section {
+            margin-bottom: 25px;
+        }
+
+        .feedback-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            color: #667eea;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-content {
+            padding: 15px;
+            background: #F5F7FA;
+            border-radius: 8px;
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--dark);
+        }
+
+        .english-note {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.08) 0%, rgba(52, 152, 219, 0.05) 100%);
+            border-left: 4px solid #3498DB;
+            padding: 18px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            line-height: 1.9;
+            color: #1E5A8E;
+            font-weight: 500;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            border-top: 1px solid #E0E0E0;
+            background: #F9F9F9;
+        }
+
+        .btn-modal {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-modal-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-modal-secondary {
+            background: white;
+            color: var(--dark);
+            border: 2px solid #E0E0E0;
+        }
+
+        /* ===== REPORT SCREEN ===== */
+        .report-screen {
+            padding: 20px 0;
+        }
+
+        .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #E0E0E0;
+        }
+
+        .report-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .report-subtitle {
+            font-size: 14px;
+            color: #7F8C8D;
+        }
+
+        .student-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            text-align: center;
+        }
+
+        .card-item {
+            padding: 10px;
+        }
+
+        .card-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .card-value {
+            font-size: 24px;
+            font-weight: 700;
+            display: block;
+        }
+
+        .report-section {
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .question-item {
+            background: white;
+            border: 1px solid #E0E0E0;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .question-item.correct {
+            border-left: 4px solid var(--success);
+        }
+
+        .question-item.incorrect {
+            border-left: 4px solid var(--danger);
+        }
+
+        .question-content {
+            flex: 1;
+        }
+
+        .question-text-report {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 15px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .question-answer {
+            font-size: 13px;
+            margin: 5px 0;
+        }
+
+        .answer-label {
+            color: #7F8C8D;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .student-answer-text {
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .correct-answer-text {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            margin-left: 10px;
+        }
+
+        .status-badge.correct {
+            background: rgba(39, 174, 96, 0.2);
+            color: var(--success);
+        }
+
+        .status-badge.incorrect {
+            background: rgba(231, 76, 60, 0.2);
+            color: var(--danger);
+        }
+
+        .teacher-evaluation {
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.08) 0%, rgba(52, 152, 219, 0.05) 100%);
+            border: 2px solid rgba(52, 152, 219, 0.2);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .teacher-evaluation-title {
+            font-weight: 700;
+            color: #3498DB;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .teacher-evaluation-text {
+            color: #1E5A8E;
+            font-size: 14px;
+            line-height: 2;
+            font-weight: 500;
+            white-space: pre-wrap;
+        }
+
+        .report-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .print-btn,
+        .again-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .print-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .again-btn {
+            background: white;
+            color: var(--dark);
+            border: 2px solid #E0E0E0;
+        }
+
+        .again-btn:hover {
+            border-color: var(--purple);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        @media print {
+            body { background: white; }
+            .container { box-shadow: none; padding: 0; }
+            .report-actions { display: none; }
+            .modal { display: none; }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            .title { font-size: 24px; }
+            .card-grid { grid-template-columns: 1fr; }
+            .report-actions { flex-direction: column; }
+            .print-btn, .again-btn { width: 100%; }
+            .question-item { flex-direction: column; }
+            .status-badge { margin-left: 0; margin-top: 8px; }
+            .question-header { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">☀️ 天气预报汉语学习游戏</div>
+            <div class="subtitle">基础汉语互动教学</div>
+        </div>
+
+        <!-- ===== LOGIN SCREEN ===== -->
+        <div class="screen active login-screen" id="loginScreen">
+            <div class="login-banner">
+                <h2>欢迎学习天气汉语！</h2>
+                <p style="line-height: 1.8; font-size: 15px;">
+                    这个游戏有 3 个关卡，帮助你学习天气相关的汉语词汇、逻辑和语法。<br>
+                    让我们开始挑战吧！
+                </p>
+            </div>
+
+            <div class="login-form">
+                <div class="form-group">
+                    <label class="form-label">请输入你的名字</label>
+                    <input 
+                        type="text" 
+                        id="studentName" 
+                        class="form-input" 
+                        placeholder="例如：张三"
+                        onkeypress="if(event.key==='Enter') game.startFromLogin()"
+                    >
+                    <div class="error-message" id="nameError">请输入名字后再开始游戏</div>
+                </div>
+
+                <button class="start-button" onclick="game.startFromLogin()">
+                    <i class="fas fa-play"></i> 开始游戏
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== GAME SCREEN ===== -->
+        <div class="screen" id="gameScreen">
+            <div class="game-header">
+                <div class="student-info">
+                    学生：<strong id="studentNameDisplay"></strong>
+                </div>
+                <div class="level-badge" id="levelBadge">第 1 关</div>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+
+            <div class="level-title">
+                <div class="level-name" id="levelTitle"></div>
+                <div class="level-desc" id="levelDesc"></div>
+            </div>
+
+            <div class="question-box">
+                <div class="question-header">
+                    <div class="question-left">
+                        <div class="question-number" id="questionNumber"></div>
+                    </div>
+                    <button class="audio-btn" id="audioBtn" title="听题目" onclick="game.playPreAnswerAudio()">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                </div>
+                <div class="question-text" id="questionText"></div>
+                <div class="question-image" id="questionImage"></div>
+            </div>
+
+            <div class="options" id="optionsContainer"></div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="game.restart()" style="display:none;" id="restartBtn">
+                    <i class="fas fa-redo"></i> 重新开始
+                </button>
+                <button class="btn btn-primary" onclick="game.nextQuestion()" style="display:none;" id="nextBtn">
+                    下一题 <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== REPORT SCREEN ===== -->
+        <div class="screen" id="reportScreen">
+            <div class="report-header">
+                <div class="report-title">📊 学习成果报告</div>
+                <div class="report-subtitle">游戏已完成，以下是你的详细分析</div>
+            </div>
+
+            <div class="student-card">
+                <div class="card-grid">
+                    <div class="card-item">
+                        <span class="card-label">学生名字</span>
+                        <span class="card-value" id="reportStudentName">-</span>
+                    </div>
+                    <div class="card-item">
+                        <span class="card-label">总得分</span>
+                        <span class="card-value" id="reportScore">0/0</span>
+                    </div>
+                    <div class="card-item">
+                        <span class="card-label">准确率</span>
+                        <span class="card-value" id="reportAccuracy">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <div class="section-header">📝 答题详情</div>
+                <div id="questionDetails"></div>
+            </div>
+
+            <div class="teacher-evaluation">
+                <div class="teacher-evaluation-title">👨‍🏫 老师的诊断建议 (Teacher's Evaluation)</div>
+                <div class="teacher-evaluation-text" id="teacherEvaluation"></div>
+            </div>
+
+            <div class="report-actions">
+                <button class="print-btn" onclick="window.print()">
+                    <i class="fas fa-print"></i> 打印/保存
+                </button>
+                <button class="again-btn" onclick="game.resetAndLogin()">再次挑战</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="modal" id="feedbackModal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalHeader">
+                <div class="modal-title" id="modalTitle"></div>
+                <button class="modal-close" onclick="game.closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn-modal btn-modal-secondary" onclick="game.closeModal()">关闭</button>
+                <button class="btn-modal btn-modal-primary" onclick="game.playPostAnswerAudio()">
+                    <i class="fas fa-volume-up"></i> 再听一遍
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gameData = {
+            levels: [
+                {
+                    name: '第一关：词汇基础 (Vocabulary)',
+                    desc: '学习天气词汇和温度概念',
+                    category: 'vocabulary',
+                    questions: [
+                        {
+                            num: 1,
+                            text: '看图(☁️)，今天的天气怎么样？',
+                            image: '☁️',
+                            preAnswerAudio: '看图，今天的天气怎么样？',
+                            options: [
+                                { text: '阴天', correct: true, postAnswerAudio: '看图，今天的天气怎么样，是阴天。' },
+                                { text: '预报', correct: false, postAnswerAudio: '看图，今天的天气怎么样，预报是错的。' },
+                                { text: '见', correct: false, postAnswerAudio: '看图，今天的天气怎么样，见是错的。' }
+                            ],
+                            feedback: {
+                                correct: {
+                                    praise: '太棒了！',
+                                    explanation: '你正确识别了☁️符号代表的天气现象。',
+                                    english: '"阴天" (Yīntiān) literally means "overcast day" or "cloudy day". It is used to describe the current weather condition when the sky is covered with clouds. The character 阴 (yīn) refers to darkness or overcast conditions, and 天 (tiān) means day. This is a weather STATE, not an action or a concept—it describes what the weather is like RIGHT NOW. When someone asks "今天天气怎么样?" (What\'s the weather like today?), you should respond with weather condition descriptors like 阴天, 晴天 (sunny), or 下雨 (rainy).'
+                                },
+                                incorrect: {
+                                    praise: '再试试！',
+                                    explanation: '这道题要求描述天气现象。让我们看看每个选项：',
+                                    english: '"预报" (yùbào) means "forecast" or "to predict"—it is an ACTION or INFORMATION about future weather, not a description of the current weather condition. "见" (jiàn) is a verb meaning "to see" and has nothing to do with weather. When asked "今天天气怎么样?" you must describe the WEATHER CONDITION using words like 阴天 (overcast/cloudy), not forecast actions or unrelated verbs. Think of it this way: the question asks "WHAT IS the weather?" not "WHAT CAN YOU DO about it?" The answer must be a weather descriptor—a noun that describes a weather state.'
+                                }
+                            }
+                        },
+                        {
+                            num: 2,
+                            text: '今天的天气很热，有35____。',
+                            image: '🌡️',
+                            preAnswerAudio: '今天的天气很热，有三十五。',
+                            options: [
+                                { text: '气温', correct: false, postAnswerAudio: '今天的天气很热，有三十五气温是错的。' },
+                                { text: '度', correct: true, postAnswerAudio: '今天的天气很热，有三十五度。' },
+                                { text: '冷', correct: false, postAnswerAudio: '今天的天气很热，有三十五冷是错的。' }
+                            ],
+                            feedback: {
+                                correct: {
+                                    praise: '真厉害！',
+                                    explanation: '正确！"度"是温度的单位。',
+                                    english: '"度" (dù) is the unit of MEASUREMENT for temperature, equivalent to "degrees" in English. When you want to state a specific temperature number in Chinese, you use this unit: "有35度" = "It is 35 degrees." You MUST pair numbers with 度 to create proper measurements. It is similar to saying "35 degrees" in English—you need both the number AND the unit. The phrase structure is: 数字 (number) + 度 (unit) = complete temperature measurement. For example: 零下5度 (minus 5 degrees), 20度 (20 degrees). This is how Chinese speakers express numerical temperatures.'
+                                },
+                                incorrect: {
+                                    praise: '接近了！',
+                                    explanation: '区别：度是单位，气温是概念。',
+                                    english: 'This is a critical grammar distinction in Chinese: "度" (dù) = UNIT (for measurement), while "气温" (qìwēn) = CONCEPT (the general idea of air temperature). When you have a NUMBER, you must use the UNIT. You can say "有35度" (there are 35 degrees—with the unit) but NOT "有35气温" (there are 35 air-temperatures—which is grammatically impossible because 气温 is a concept, not a unit). Compare these: ✓ "这里的气温很高" (The air temperature here is very high—describing quality) vs. ✓ "今天有35度" (Today it is 35 degrees—stating measurement). You cannot mix concepts with numbers; you need units for numbers.'
+                                }
+                            }
+                        },
+                        {
+                            num: 3,
+                            text: '我看天气____，明天会下雨。',
+                            image: '🌧️',
+                            preAnswerAudio: '我看天气，明天会下雨。',
+                            options: [
+                                { text: '预报', correct: true, postAnswerAudio: '我看天气预报，明天会下雨。' },
+                                { text: '阴天', correct: false, postAnswerAudio: '我看天气阴天，明天会下雨是错的。' },
+                                { text: '低', correct: false, postAnswerAudio: '我看天气低，明天会下雨是错的。' }
+                            ],
+                            feedback: {
+                                correct: {
+                                    praise: '漂亮！',
+                                    explanation: '"预报"是指预测或查看天气信息的行为。',
+                                    english: '"预报" (yùbào) is a verb meaning "to forecast" or "to check the forecast". In this sentence structure "我看天气____" (I look at/check the weather____), the blank requires an ACTION or INFORMATION that you can look at. "看天气预报" = "to check the weather forecast"—it is an ACTIVITY. You are performing the action of checking/looking at forecasting information to learn about tomorrow. This is different from a weather descriptor like 阴天 (overcast), which describes the weather state itself. "预报" is information that helps you KNOW about future weather; it is an informational resource, not a weather condition.'
+                                },
+                                incorrect: {
+                                    praise: '别灰心！',
+                                    explanation: '"预报"是行为，不是天气描述。',
+                                    english: 'The key here is understanding WHAT the sentence is asking for. "我看天气____" asks "I look at/check the weather____" — what is the THING you look at? The answer must be "预报" (forecast information)—something you can CHECK or VIEW. "阴天" is a WEATHER CONDITION (describes current weather), which you don\'t "look at"—you EXPERIENCE it or OBSERVE it. "低" is a temperature LEVEL (describes a quality), also something you don\'t "look at" in this context. You "look at" INFORMATION like forecasts. "看天气预报" is a common Chinese phrase meaning "to check the weather forecast"—it is the ACTION of gathering weather information for future planning.'
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    name: '第二关：逻辑与关系 (Logic)',
+                    desc: '理解温度与天气的对应关系',
+                    category: 'logic',
+                    questions: [
+                        {
+                            num: 1,
+                            text: '如果今天很冷，气温会怎么样？',
+                            image: '❄️',
+                            preAnswerAudio: '如果今天很冷，气温会怎么样？',
+                            options: [
+                                { text: '很低', correct: true, postAnswerAudio: '如果今天很冷，气温会很低。' },
+                                { text: '很高', correct: false, postAnswerAudio: '如果今天很冷，气温会很高是错的。' },
+                                { text: '希望', correct: false, postAnswerAudio: '如果今天很冷，气温会希望是错的。' }
+                            ],
+                            feedback: {
+                                correct: {
+                                    praise: '完美！',
+                                    explanation: '你理解了冷和低温的对应关系。',
+                                    english: 'Excellent! This demonstrates logical reasoning: COLD weather always corresponds to LOW temperature. This is a fundamental natural principle. When it is cold (冷) outside, the temperature reading on a thermometer goes DOWN, showing a LOW number. Conversely, when it is hot (热), the temperature reading goes UP, showing a HIGH number. This cause-and-effect relationship is consistent and unchanging in real physics and in Chinese language logic. Cold = 冷 always pairs with low temperature = 气温低. This is not arbitrary—it follows natural law.'
+                                },
+                                incorrect: {
+                                    praise: '学习机会！',
+                                    explanation: '冷一定对应低温。',
+                                    english: 'Understanding weather logic is essential: COLD WEATHER (冷) ALWAYS produces LOW TEMPERATURE (气温低), and HOT WEATHER (热) ALWAYS produces HIGH TEMPERATURE (气温高). This is not a language preference—it is a reflection of real-world physics. When you ask "if it is cold, what will the temperature be?", the answer is logically and scientifically "low". There is no ambiguity. "希望" (hope/wish) is completely unrelated to temperature—it is a desire or intention, not a weather state. The correct answer must show understanding of the temperature-weather relationship.'
+                                }
+                            }
+                        },
+                        {
+                            num: 2,
+                            text: '夏天气温____，冬天气温____。',
+                            image: '☀️ ❄️',
+                            preAnswerAudio: '夏天气温，冬天气温。',
+                            options: [
+                                { text: '低 / 高', correct: false, postAnswerAudio: '夏天气温低，冬天气温高是错的。' },
+                                { text: '高 / 低', correct: true, postAnswerAudio: '夏天气温高，冬天气温低。' },
+                                { text: '见 / 冷', correct: false, postAnswerAudio: '夏天气温见，冬天气温冷是错的。' }
+                            ],
+                            feedback: {
+                                correct: {
+                                    praise: '出色！',
+                                    explanation: '完全理解季节与温度的对应。',
+                                    english: 'Perfect understanding of seasonal temperature patterns! Summer (夏天) is the HOTTEST season of the year, so 气温高 (high temperature). Winter (冬天) is the COLDEST season of the year, so 气温低 (low temperature). This pattern is CONSISTENT ACROSS THE ENTIRE WORLD and NEVER REVERSES. This is a fundamental fact of Earth\'s seasons—it is both scientifically true and linguistically correct in Chinese. Understanding seasonal logic shows you grasp how weather systems work. Summer heat and winter cold are constants in human experience and must be accurately reflected in language.'
+                                },
+                                incorrect: {
+                                    praise: '接近了！',
+                                    explanation: '夏天最热→高，冬天最冷→低。',
+                                    english: 'You must understand the seasonal principle: Summer is the WARMEST season (high temperature), and Winter is the COLDEST season (low temperature). This is a FACT, not an opinion. If your answer reverses these (saying summer = low, winter = high), you are contradicting basic climate science and proper Chinese language use. The seasons do not vary; they are consistent. Therefore, the temperature pattern is also consistent and unchangeable. Getting this right shows you understand not just language, but the logical relationship between seasons and weather conditions.'
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    name: '第三关：语法结构 (Grammar)',
+                    desc: '学习因果关系和表达愿望',
+                    category: 'grammar',
+                    questions: [
+                        {
+                            num: 1,
+                            text: '____今天是阴天，____我想睡觉。',
+                            image: '😴',
+                            preAnswerAudio: '今天是阴天，我想睡觉。',
+                            options: [
+                                { text: '所以 / 因为', correct: false, postAnswerAudio: '所以今天是阴天，因为我想睡觉是错的。' },
+                                { text: '因为 / 所以', correct: true, postAnswerAudio: '因为今天是阴天，所以我想睡觉。' },
+                                { text: '希望 / 所以', correct: false, postAnswerAudio: '希望今天是阴天，所以我想睡觉是错的。' }
+                            ],
+                            feedback: {
+                                correct: {
+                                    praise: '太棒了！',
+                                    explanation: '你完全掌握了"因为...所以..."因果句型。',
+                                    english: 'Excellent! You have mastered the CAUSE-AND-EFFECT sentence structure "因为...所以..." (Because...So...). This is THE MOST FUNDAMENTAL SENTENCE PATTERN IN CHINESE. The structure is RIGID: 因为 [CAUSE/REASON] + 所以 [EFFECT/RESULT]. "因为" ALWAYS introduces the REASON for something (the CAUSE). "所以" ALWAYS introduces the CONSEQUENCE (the EFFECT). In your sentence: "因为今天是阴天" = Because today is overcast (REASON), "所以我想睡觉" = so I want to sleep (RESULT/CONSEQUENCE). The cause comes FIRST logically and grammatically. This mirrors human thinking: we understand WHY something happens, THEN we understand WHAT happens. This structure is unchangeable.'
+                                },
+                                incorrect: {
+                                    praise: '这是关键语法！',
+                                    explanation: '顺序必须是：因为(原因) → 所以(结果)。',
+                                    english: 'THE ORDER IS NON-NEGOTIABLE IN CHINESE GRAMMAR. You MUST follow this pattern: 因为 [REASON/CAUSE FIRST] → 所以 [RESULT/CONSEQUENCE SECOND]. If you reverse it to "所以...因为", you are saying "So/Therefore [result], Because [reason]"—which makes NO LOGICAL SENSE. You cannot understand the consequence before knowing the cause. This violates both Chinese grammar rules AND basic logic. The cause must ALWAYS come first in temporal sequence and in the sentence structure. Mastering this rule is essential for all Chinese communication involving reasons and results.'
+                                }
+                            }
+                        },
+                        {
+                            num: 2,
+                            text: '今天太冷了，我____明天气温高一点。',
+                            image: '🙏',
+                            preAnswerAudio: '今天太冷了，我...明天气温高一点。',
+                            options: [
+                                { text: '因为', correct: false, postAnswerAudio: '今天太冷了，我因为明天气温高一点是错的。' },
+                                { text: '所以', correct: false, postAnswerAudio: '今天太冷了，我所以明天气温高一点是错的。' },
+                                { text: '希望', correct: true, postAnswerAudio: '今天太冷了，我希望明天气温高一点。' }
+                            ],
+                            feedback: {
+                                correct: {
+                                    praise: '非常好！',
+                                    explanation: '"希望"表示个人的愿望或期待。',
+                                    english: '"希望" (xīwàng) is a VERB that means "to hope for", "to wish for", or "to expect". It expresses PERSONAL DESIRE or EXPECTATION about something in the future. This is fundamentally different from logical connectors like "因为...所以..." which show CAUSE-AND-EFFECT relationships between facts or events. In your sentence: "我希望明天高一点" = "I hope [that] tomorrow [the temperature] is higher" — you are expressing a PERSONAL WISH or PREFERENCE about what you WANT to happen, not explaining why something happens. "希望" often indicates subjective feelings, desires, or hopes, while "因为...所以" describes objective logical sequences. Both are essential in Chinese, but they serve different communicative purposes.'
+                                },
+                                incorrect: {
+                                    praise: '重要语法点！',
+                                    explanation: '这表达的是愿望，不是因果。',
+                                    english: 'Do NOT confuse this with "因为...所以..." causation. The sentence "今天太冷了，我____明天高一点" is asking for an expression of DESIRE or HOPE, not a LOGICAL CONSEQUENCE. "因为" and "所以" show OBJECTIVE cause-effect (facts causing other facts). "希望" shows SUBJECTIVE desires (what the speaker WANTS or WISHES for). The blank requires a word that means "I want/hope/wish that tomorrow [temperature] is higher". Only "希望" can express this personal desire. The logical connectors would mean "Therefore tomorrow is high"—which does not express your personal hope; it would be nonsensical in this context. Understanding this distinction is crucial for expressing both logical thinking AND personal desires in Chinese.'
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        class WeatherGame {
+            constructor() {
+                this.studentName = '';
+                this.currentLevel = 0;
+                this.currentQuestion = 0;
+                this.score = 0;
+                this.totalQuestions = 0;
+                this.stats = {
+                    vocabulary: { correct: 0, incorrect: 0 },
+                    logic: { correct: 0, incorrect: 0 },
+                    grammar: { correct: 0, incorrect: 0 }
+                };
+                this.answered = false;
+                this.currentQuestion_ = null;
+                this.currentFeedback_ = null;
+                this.currentCorrectOption_ = null;
+                this.questionRecords = [];
+            }
+
+            startFromLogin() {
+                const nameInput = document.getElementById('studentName');
+                const nameValue = nameInput.value.trim();
+
+                if (!nameValue) {
+                    document.getElementById('nameError').classList.add('show');
+                    return;
+                }
+
+                this.studentName = nameValue;
+                document.getElementById('nameError').classList.remove('show');
+                this.startGame();
+            }
+
+            startGame() {
+                this.currentLevel = 0;
+                this.currentQuestion = 0;
+                this.score = 0;
+                this.totalQuestions = gameData.levels.reduce((sum, l) => sum + l.questions.length, 0);
+                this.stats = { vocabulary: { correct: 0, incorrect: 0 }, logic: { correct: 0, incorrect: 0 }, grammar: { correct: 0, incorrect: 0 } };
+                this.questionRecords = [];
+                this.answered = false;
+
+                document.getElementById('studentNameDisplay').textContent = this.studentName;
+                this.showScreen('gameScreen');
+                this.loadQuestion();
+            }
+
+            loadQuestion() {
+                const level = gameData.levels[this.currentLevel];
+                const question = level.questions[this.currentQuestion];
+                this.currentQuestion_ = question;
+
+                document.getElementById('levelTitle').textContent = level.name;
+                document.getElementById('levelDesc').textContent = level.desc;
+                document.getElementById('levelBadge').textContent = `第 ${this.currentLevel + 1} 关`;
+                document.getElementById('questionNumber').textContent = `题 ${this.currentQuestion + 1}`;
+                document.getElementById('questionText').textContent = question.text;
+                document.getElementById('questionImage').textContent = question.image;
+
+                const optionsContainer = document.getElementById('optionsContainer');
+                optionsContainer.innerHTML = '';
+
+                question.options.forEach((option, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    optionDiv.innerHTML = `<div class="radio"></div><span>${this.addPinyinToOption(option.text)}</span>`;
+                    optionDiv.onclick = () => this.selectOption(index, option.correct, option, question, level.category);
+                    optionsContainer.appendChild(optionDiv);
+                });
+
+                document.getElementById('nextBtn').style.display = 'none';
+                this.updateUI();
+                this.answered = false;
+            }
+
+            selectOption(index, isCorrect, option, question, category) {
+                if (this.answered) return;
+                this.answered = true;
+
+                const options = document.querySelectorAll('.option');
+                options.forEach(opt => opt.classList.add('disabled'));
+
+                const correctOption = question.options.find(o => o.correct);
+                this.currentCorrectOption_ = correctOption;
+
+                this.questionRecords.push({
+                    text: question.text,
+                    studentAnswer: option.text,
+                    correctAnswer: correctOption.text,
+                    isCorrect: isCorrect,
+                    category: category
+                });
+
+                if (isCorrect) {
+                    options[index].classList.add('correct');
+                    this.score++;
+                    this.stats[category].correct++;
+                } else {
+                    options[index].classList.add('incorrect');
+                    this.stats[category].incorrect++;
+                    const correctIndex = question.options.findIndex(o => o.correct);
+                    options[correctIndex].classList.add('correct');
+                }
+
+                this.currentFeedback_ = isCorrect ? question.feedback.correct : question.feedback.incorrect;
+                this.showFeedback(isCorrect);
+                this.updateUI();
+
+                setTimeout(() => {
+                    document.getElementById('nextBtn').style.display = 'inline-block';
+                }, 600);
+            }
+
+            showFeedback(isCorrect) {
+                const modal = document.getElementById('feedbackModal');
+                const modalHeader = document.getElementById('modalHeader');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalBody = document.getElementById('modalBody');
+
+                modalHeader.className = isCorrect ? 'modal-header correct' : 'modal-header incorrect';
+                modalTitle.textContent = this.currentFeedback_.praise;
+
+                const html = `
+                    <div class="feedback-section">
+                        <div class="section-title">${isCorrect ? '✓ 解释' : '✗ 解释'}</div>
+                        <div class="section-content">${this.currentFeedback_.explanation}</div>
+                    </div>
+                    <div class="feedback-section">
+                        <div class="section-title">📝 英文详细说明</div>
+                        <div class="english-note">${this.currentFeedback_.english}</div>
+                    </div>
+                `;
+
+                modalBody.innerHTML = html;
+                modal.classList.add('show');
+            }
+
+            playPreAnswerAudio() {
+                const question = this.currentQuestion_;
+                if (!question.preAnswerAudio) return;
+
+                const utterance = new SpeechSynthesisUtterance(question.preAnswerAudio);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.8;
+                
+                const audioBtn = document.getElementById('audioBtn');
+                audioBtn.classList.add('playing');
+                
+                utterance.onend = () => {
+                    audioBtn.classList.remove('playing');
+                };
+                
+                window.speechSynthesis.speak(utterance);
+            }
+
+            playPostAnswerAudio() {
+                if (!this.currentCorrectOption_ || !this.currentCorrectOption_.postAnswerAudio) return;
+
+                const utterance = new SpeechSynthesisUtterance(this.currentCorrectOption_.postAnswerAudio);
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.8;
+                window.speechSynthesis.speak(utterance);
+            }
+
+            nextQuestion() {
+                this.currentQuestion++;
+
+                if (this.currentQuestion >= gameData.levels[this.currentLevel].questions.length) {
+                    this.currentQuestion = 0;
+                    this.currentLevel++;
+
+                    if (this.currentLevel >= gameData.levels.length) {
+                        this.showResults();
+                        return;
+                    }
+                }
+
+                this.loadQuestion();
+            }
+
+            showResults() {
+                const totalCorrect = Object.values(this.stats).reduce((sum, cat) => sum + cat.correct, 0);
+                const accuracy = Math.round((totalCorrect / this.totalQuestions) * 100);
+
+                document.getElementById('reportStudentName').textContent = this.studentName;
+                document.getElementById('reportScore').textContent = `${totalCorrect}/${this.totalQuestions}`;
+                document.getElementById('reportAccuracy').textContent = `${accuracy}%`;
+
+                this.generateQuestionDetails();
+                this.generateTeacherEvaluation();
+
+                this.showScreen('reportScreen');
+            }
+
+            generateQuestionDetails() {
+                let html = '';
+                this.questionRecords.forEach((record, index) => {
+                    const statusClass = record.isCorrect ? 'correct' : 'incorrect';
+                    const statusText = record.isCorrect ? '✓ 正确' : '✗ 错误';
+
+                    html += `
+                        <div class="question-item ${statusClass}">
+                            <div class="question-content">
+                                <div class="question-text-report">${index + 1}. ${record.text}</div>
+                                <div class="question-answer">
+                                    <span class="answer-label">你的答案：</span>
+                                    <span class="student-answer-text">${record.studentAnswer}</span>
+                                </div>
+                                <div class="question-answer">
+                                    <span class="answer-label">正确答案：</span>
+                                    <span class="correct-answer-text">${record.correctAnswer}</span>
+                                </div>
+                            </div>
+                            <div class="status-badge ${statusClass}">${statusText}</div>
+                        </div>
+                    `;
+                });
+                document.getElementById('questionDetails').innerHTML = html;
+            }
+
+            generateTeacherEvaluation() {
+                const totalCorrect = Object.values(this.stats).reduce((sum, cat) => sum + cat.correct, 0);
+                const accuracy = Math.round((totalCorrect / this.totalQuestions) * 100);
+
+                let evaluation = '';
+
+                if (accuracy === 100) {
+                    evaluation = `Perfect score! ${this.studentName} demonstrates excellent mastery across all learning objectives. The student clearly understands: (1) Chinese weather vocabulary and the distinction between weather conditions (like 阴天), measurement units (like 度), and informational concepts (like 预报); (2) logical relationships between weather states and temperature levels, including seasonal patterns; (3) complex grammar structures, particularly the cause-effect pattern (因为...所以...) and the expression of personal desires (希望). This student is ready for more advanced topics.`;
+                } else if (accuracy >= 80) {
+                    evaluation = `Strong performance! ${this.studentName} demonstrates solid understanding of most concepts. The student has successfully grasped the major vocabulary distinctions and shows good logical reasoning about temperature relationships. There is strong command of the cause-effect structure (因为...所以...). Continue practicing these specific grammar patterns and vocabulary, and this student will achieve mastery quickly.`;
+                } else if (accuracy >= 60) {
+                    evaluation = `Good effort! ${this.studentName} shows developing understanding of Chinese weather concepts and grammar. The student is building comprehension of vocabulary distinctions (weather conditions vs. concepts vs. units) and logical relationships. There are opportunities for improvement in specific areas. Recommend focused practice on the concepts where errors occurred, with attention to understanding the WHY behind each rule, not just memorization.`;
+                } else {
+                    evaluation = `Learning in progress. ${this.studentName} is beginning to engage with Chinese weather vocabulary and grammar structures. The student would benefit from concentrated review of fundamental vocabulary distinctions and grammar patterns. Focus on: understanding different TYPES of words (weather states vs. units vs. actions), logical relationships between concepts, and the rigid grammatical structures like 因为...所以.... Recommend breaking down each concept into smaller pieces and practicing with concrete examples.`;
+                }
+
+                const statsText = `
+
+Performance Summary:
+- Vocabulary (第一关): ${this.stats.vocabulary.correct}/${this.stats.vocabulary.correct + this.stats.vocabulary.incorrect} correct
+- Logic (第二关): ${this.stats.logic.correct}/${this.stats.logic.correct + this.stats.logic.incorrect} correct
+- Grammar (第三关): ${this.stats.grammar.correct}/${this.stats.grammar.correct + this.stats.grammar.incorrect} correct
+- Overall Accuracy: ${accuracy}%`;
+
+                document.getElementById('teacherEvaluation').textContent = evaluation + statsText;
+            }
+
+            updateUI() {
+                const totalAnswered = Object.values(this.stats).reduce((sum, cat) => sum + cat.correct + cat.incorrect, 0);
+                const progress = (totalAnswered / this.totalQuestions) * 100;
+                document.getElementById('progressBar').style.width = `${progress}%`;
+            }
+
+            closeModal() {
+                document.getElementById('feedbackModal').classList.remove('show');
+            }
+
+            showScreen(screenId) {
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                document.getElementById(screenId).classList.add('active');
+                window.scrollTo(0, 0);
+            }
+
+            restart() {
+                this.startGame();
+            }
+
+            resetAndLogin() {
+                document.getElementById('studentName').value = '';
+                this.showScreen('loginScreen');
+            }
+
+            addPinyinToOption(text) {
+                // 拼音映射表
+                const pinyinMap = {
+                    '阴天': 'yīntiān',
+                    '预报': 'yùbào',
+                    '见': 'jiàn',
+                    '气温': 'qìwēn',
+                    '度': 'dù',
+                    '冷': 'lěng',
+                    '很低': 'hěn dī',
+                    '很高': 'hěn gāo',
+                    '希望': 'xīwàng',
+                    '低 / 高': 'dī / gāo',
+                    '高 / 低': 'gāo / dī',
+                    '见 / 冷': 'jiàn / lěng',
+                    '所以 / 因为': 'suǒyǐ / yīnwèi',
+                    '因为 / 所以': 'yīnwèi / suǒyǐ',
+                    '希望 / 所以': 'xīwàng / suǒyǐ',
+                    '因为': 'yīnwèi',
+                    '所以': 'suǒyǐ'
+                };
+
+                // 如果文本在映射表中，添加拼音在括号内
+                if (pinyinMap[text]) {
+                    return `${text} <span class="pinyin-inline">(${pinyinMap[text]})</span>`;
+                }
+
+                // 否则返回原文本
+                return text;
+            }
+        }
+
+        const game = new WeatherGame();
+    </script>
+</body>
+</html>
